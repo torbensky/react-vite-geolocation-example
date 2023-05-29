@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { LocationDisplay } from './LocationDisplay'
 import { GeoLocation } from './geo'
 
-const canGetLocation = !!navigator.geolocation
+const canGetLocation = "geolocation" in navigator
 
 function App() {
   const [yourLocation, setYourLocation] = useState<GeoLocation|undefined>()
