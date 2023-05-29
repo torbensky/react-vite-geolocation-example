@@ -1,33 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import { LocationDisplay } from './LocationDisplay'
+import { GeoLocation } from './geo'
+
+const canGetLocation = !!navigator.geolocation
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [yourLocation, setYourLocation] = useState<GeoLocation|undefined>()
 
+  const handleLocationUpdate = (pos: GeolocationPosition) => {
+    setYourLocation(pos)
+  }
+
+  const handleLocationError = (err: GeolocationPositionError) => {
+    console.error(`Error ${err.code} while getting location: ${err.message}`)
+  }
+
+  useEffect(() => {
+    // Check if we are running on a device that has location capability
+    if(canGetLocation){
+      // subscribe to location updates
+      const watchId = navigator.geolocation.watchPosition(handleLocationUpdate, handleLocationError, {enableHighAccuracy: true})
+
+      // clean up subscription when the component unmounts
+      return () => navigator.geolocation.clearWatch(watchId)
+    }
+  }, [])
+  
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>Your Location</h1>
+      {canGetLocation ? 
+        <LocationDisplay location={yourLocation} />
+        :
+        <p>Your device does not support geo locating, sorry :(</p>
+      }
     </>
   )
 }
